@@ -1,4 +1,4 @@
 ---
 
 allow_reboot: no
-reboot_timeout: 10
+reboot_timeout: 3600
