@@ -20,6 +20,10 @@ Available variables are listed below, along with default values:
 
 None.
 
+## Install role
+
+    ansible-galaxy install gaeldb.btrfs
+
 ## Example Playbook
 
     - hosts: servers
