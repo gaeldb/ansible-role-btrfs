@@ -1,0 +1,47 @@
+---
+
+- name: Add UEK repository
+  yum_repository:
+    name: ol8_UEKR6
+    description: Latest Unbreakable Enterprise Kernel Release 6 for Oracle Linux $releasever ($basearch)
+    baseurl: https://yum.oracle.com/repo/OracleLinux/OL8/UEKR6/$basearch/
+    gpgkey: https://yum.oracle.com/RPM-GPG-KEY-oracle-ol8
+
+- name: Install BTRFS tools
+  ansible.builtin.package:
+    name:
+      - yum-utils
+      - btrfs-progs
+
+- name: Install BTRFS compliant kernel
+  ansible.builtin.package:
+    name:
+      - kernel-uek
+  register: kernel_uek_updated
+
+- name: Check if UEK new kernel need a restart
+  ansible.builtin.shell:
+    cmd: "dnf needs-restarting -r | grep linux-firmware"
+  register: need_restart
+  failed_when:
+    - need_restart.rc < 0
+    - need_restart.rc >= 2
+  changed_when:
+    - need_restart.rc == 0
+
+- fail:
+    msg: "Reboot needed: linux-firmware has been updated"
+  when: need_restart.changed
+  ignore_errors: True
+
+- fail:
+    msg: "Reboot needed: reboot option (allow_reboot) is {{ allow_reboot }}"
+  when: need_restart.changed
+  ignore_errors: True
+
+- name: Reboot host with new kernel UEK ()
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ reboot_timeout }}"
+  when:
+    - need_restart.changed
+    - allow_reboot|bool

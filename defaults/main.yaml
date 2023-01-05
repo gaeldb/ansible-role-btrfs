@@ -1,0 +1,4 @@
+---
+
+allow_reboot: yes
+reboot_timeout: 10
